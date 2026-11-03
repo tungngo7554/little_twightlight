@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#000000" />
+    <title>Untitled Game</title>
+  </head>
+  <body>
+    <div id="stage">
+      <img id="bg" alt="" draggable="false" />
+      <div id="layer-hotspots"></div>
+      <div id="layer-ui"></div>
+
+      <div id="start-screen" class="overlay">
+        <div id="start-text"></div>
+        <div id="lang-switch">
+          <button type="button" data-lang="vi">Tiếng Việt</button>
+          <span>·</span>
+          <button type="button" data-lang="en">English</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="rotate-hint"><span id="rotate-text"></span></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
