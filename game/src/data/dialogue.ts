@@ -45,6 +45,17 @@ export const LINES = {
 
   // ----- Hành lang (dùng ở bước sau) -----
   hall_enter: L('thought', 'Hành lang… sao im lặng thế này?', 'The hallway... why is it so quiet?'),
+  hall_call: L('speech', 'Venica?', 'Venica?'),
+
+  // ----- Phòng ngủ chính: bức tranh (lần đầu mở) -----
+  bedroom_pic_1: L('thought', 'Là lỗi của anh', "It's my fault"),
+  bedroom_pic_2: L('speech', 'Chuyện gì xảy ra vậy?', 'What happened?'),
+  bedroom_pic_3: L('speech', 'Marie?', 'Marie?'),
+  bedroom_pic_4: L('speech', 'Venica?', 'Venica?'),
+
+  // ----- Đồng hồ -----
+  study_clock_time: L('thought', '4:35 p.m.', '4:35 p.m.'), // đồng hồ góc thư phòng
+  clock_click: L('sfx', '*cạch*', '*click*', 'clack'), // chỉnh đúng giờ ở hành lang
 } satisfies Record<string, LineDef>;
 
 export type LineId = keyof typeof LINES;
@@ -64,3 +75,12 @@ export const INTRO: LineId[] = [
   'intro_7',
   'intro_8',
 ];
+
+// Lần đầu bước ra hành lang
+export const HALL_FIRST_VISIT: LineId[] = ['hall_enter', 'hall_call'];
+
+// Lần đầu mở bức tranh trong phòng ngủ chính: câu nghĩ hiện ngay khi bức tranh mở
+export const BEDROOM_PICTURE_FIRST: LineId[] = ['bedroom_pic_1'];
+
+// ...và đoạn thoại hiện sau khi thoát khỏi bức tranh, trở về phòng ngủ
+export const BEDROOM_PICTURE_AFTER: LineId[] = ['bedroom_pic_2', 'bedroom_pic_3', 'bedroom_pic_4'];

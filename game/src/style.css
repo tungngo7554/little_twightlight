@@ -1,3 +1,19 @@
+/* Phông chữ Cuprum (có tiếng Việt). Đặt file vào public/assets/fonts/ */
+@font-face {
+  font-family: 'Cuprum';
+  src: url('/assets/fonts/cuprum.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cuprum';
+  src: url('/assets/fonts/cuprum-italic.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 :root {
   --u: 10px; /* 1% chiều ngang khung hình, được main.ts cập nhật */
   --ink: #f1e6d0;
@@ -11,7 +27,7 @@ html, body {
   height: 100%;
   background: #000;
   overflow: hidden;
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: 'Cuprum', Georgia, 'Times New Roman', serif;
   color: var(--ink);
   -webkit-user-select: none;
   user-select: none;
@@ -241,6 +257,22 @@ html, body {
   pointer-events: none;
 }
 .toast.on { opacity: 1; }
+
+/* ---------- Tên vật phẩm đang chọn (góc trên phải) ---------- */
+.selected-label {
+  position: absolute;
+  z-index: 46; /* thấp hơn toast (47) để chú thích nhặt đồ luôn nằm trên */
+  top: calc(var(--u) * 2.4);
+  right: calc(var(--u) * 2.4);
+  font-size: calc(var(--u) * 1.7);
+  color: #f0c35a; /* cùng màu viền ô vật phẩm đang chọn */
+  text-shadow: 0 1px 3px #000, 0 0 6px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.selected-label.on { opacity: 1; }
 
 /* ---------- Thanh vật phẩm (mép dưới) ---------- */
 .inventory {
