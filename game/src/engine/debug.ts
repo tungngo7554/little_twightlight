@@ -14,7 +14,12 @@ interface Rect {
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const rectText = (r: Rect) => `{ x: ${r1(r.x)}, y: ${r1(r.y)}, w: ${r1(r.w)}, h: ${r1(r.h)} }`;
 
-export function initDebug(stage: Stage): void {
+export interface DebugAction {
+  label: string;
+  run: () => void;
+}
+
+export function initDebug(stage: Stage, actions: DebugAction[] = []): void {
   const saved: Partial<Record<SceneId, Rect[]>> = {};
   let layer: HTMLDivElement | null = null;
   let panel: HTMLDivElement | null = null;
@@ -75,6 +80,7 @@ export function initDebug(stage: Stage): void {
       <div><b>DEBUG</b> – phím D để tắt</div>
       <div class="row" id="dbg-scenes"></div>
       <div class="row" id="dbg-size"></div>
+      <div class="row" id="dbg-actions"></div>
       <div class="row">Con trỏ: <span id="dbg-coords">–</span></div>
       <div class="row">Kéo để vẽ vùng bấm:</div>
       <textarea id="dbg-out" readonly placeholder="{ x, y, w, h }"></textarea>
@@ -94,6 +100,14 @@ export function initDebug(stage: Stage): void {
       scenesBox.appendChild(b);
     });
     markActiveScene();
+
+    const actionsBox = panel.querySelector('#dbg-actions')!;
+    actions.forEach((a) => {
+      const b = document.createElement('button');
+      b.textContent = a.label;
+      b.addEventListener('click', a.run);
+      actionsBox.appendChild(b);
+    });
 
     panel.querySelector('#dbg-copy')!.addEventListener('click', () => {
       outEl.select();
