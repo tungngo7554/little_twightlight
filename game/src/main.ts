@@ -13,6 +13,7 @@ import { INTRO, HALL_FIRST_VISIT, BEDROOM_PICTURE_FIRST, BEDROOM_PICTURE_AFTER }
 import { getLang, loadLang, setLang, t, type Lang } from './data/i18n';
 import { ClockPuzzle } from './engine/clock';
 import { NEEDLE_URL } from './data/clockConfig';
+import { SCENE_PROPS, LOGS_IN_FIREPLACE, type PropDef } from './data/props';
 
 const stage = new Stage();
 const audio = new AudioPlayer();
@@ -54,6 +55,8 @@ let doorOpen = false; // đã mở cửa thư phòng?
 let hallSeen = false; // đã vào hành lang lần đầu (câu nghĩ chỉ hiện một lần)?
 let clockSolved = false; // đã chỉnh đúng giờ đồng hồ ở hành lang?
 let storageKeyTaken = false; // đã lấy chìa trong đồng hồ?
+let logsPlaced = 0; // số khúc gỗ đã bỏ vào lò sưởi (cần 2)
+let fireLit = false; // đã đốt lửa?
 let bedroomPictureSeen = false; // đã mở bức tranh phòng ngủ lần đầu (thoại chỉ chạy một lần)?
 
 // Câu đố chỉnh kim đồng hồ (cảnh hall_clock_close)
@@ -113,6 +116,16 @@ function backTarget(scene: SceneId): SceneId {
       return 'hall_2nd';
     case 'master_bedroom':
       return 'hall_2nd';
+    case 'hall_2nd_venica_room':
+      return 'hall_2nd';
+    case 'hall_2nd_left':
+      return 'hall_2nd_venica_room';
+    case 'main_hall_1st':
+    case 'main_hall_1st_2':
+      return 'hall_2nd_left';
+    case 'lo_suoi':
+    case 'lo_suoi_sang':
+      return mainHallScene();
     case 'hall_shelf_close':
       return 'hall_shelf';
     case 'hall_clock':
@@ -126,6 +139,47 @@ function backTarget(scene: SceneId): SceneId {
   }
 }
 
+/** Lớp ảnh phụ (gỗ, lửa...) nằm trên ảnh nền, dưới các vùng bấm. */
+const propLayer = document.createElement('div');
+Object.assign(propLayer.style, { position: 'absolute', inset: '0', pointerEvents: 'none' });
+stage.hotspotLayer.parentElement!.insertBefore(propLayer, stage.hotspotLayer);
+
+function propsFor(id: SceneId): PropDef[] {
+  // Cảnh lò sưởi chưa đốt: hiện số khúc gỗ người chơi đã đặt vào
+  if (id === 'lo_suoi') return LOGS_IN_FIREPLACE.slice(0, logsPlaced);
+  return SCENE_PROPS[id] ?? [];
+}
+
+function renderProps(id: SceneId): void {
+  propLayer.replaceChildren();
+  for (const p of propsFor(id)) {
+    const img = document.createElement('img');
+    img.src = p.img;
+    img.alt = '';
+    img.draggable = false;
+    Object.assign(img.style, {
+      position: 'absolute',
+      left: `${p.rect.x}%`,
+      top: `${p.rect.y}%`,
+      width: `${p.rect.w}%`,
+      height: `${p.rect.h}%`,
+      objectFit: 'contain',
+      transformOrigin: 'center',
+      transform: `rotate(${p.rotate ?? 0}deg) scale(${p.scale ?? 1})`,
+    });
+    propLayer.appendChild(img);
+  }
+}
+
+/** Sảnh tầng 1: sau khi đốt lò sưởi thì đổi sang ảnh khác. */
+function mainHallScene(): SceneId {
+  return fireLit ? 'main_hall_1st_2' : 'main_hall_1st';
+}
+
+function fireplaceScene(): SceneId {
+  return fireLit ? 'lo_suoi_sang' : 'lo_suoi';
+}
+
 function openDesk(): void {
   // Bàn còn chìa chỉ khi chưa nhặt chìa và chưa mở cửa
   stage.setScene(keyTaken || doorOpen ? 'desk_empty' : 'desk_key');
@@ -137,6 +191,7 @@ function onHotspot(id: HotspotId): void {
 
   // Chỉ có cửa của thư phòng đang khoá mới cần chìa đang chọn; bấm chỗ khác thì hủy chọn rồi làm việc đó.
   const isLockedDoor = id === 'door' && scene === 'study_locked';
+  const selected = inventory.selected; // lấy trước khi hủy chọn, dùng cho lò sưởi
   if (!isLockedDoor) inventory.deselect();
 
   switch (id) {
@@ -180,6 +235,41 @@ function onHotspot(id: HotspotId): void {
 
     case 'master_door':
       stage.setScene('master_bedroom');
+      break;
+
+    case 'venica_door':
+      stage.setScene('hall_2nd_venica_room');
+      break;
+
+    case 'to_hall_left':
+      stage.setScene('hall_2nd_left');
+      break;
+
+    case 'to_main_hall':
+      stage.setScene(mainHallScene());
+      break;
+
+    case 'to_fireplace':
+      stage.setScene(fireplaceScene());
+      break;
+
+    case 'fireplace':
+      if (scene !== 'lo_suoi') break;
+      if (selected === 'wood' || selected === 'wood_2') {
+        logsPlaced++;
+        inventory.consume(selected); // gỗ là vật tiêu hao nên biến mất khỏi túi
+        renderProps(scene); // hiện khúc gỗ vừa đặt
+      } else if (selected === 'matches') {
+        if (logsPlaced < 2) {
+          dialogue.show('fireplace_need_wood');
+        } else {
+          fireLit = true;
+          inventory.consume('matches');
+          stage.setScene('lo_suoi_sang');
+        }
+      } else {
+        dialogue.show('fireplace_look');
+      }
       break;
 
     case 'bedroom_picture': {
@@ -243,6 +333,7 @@ stage.el.addEventListener('click', (e) => {
 });
 
 stage.onSceneChange(renderHotspots);
+stage.onSceneChange(renderProps);
 
 // ----- Khởi động -----
 
@@ -264,6 +355,7 @@ async function boot(): Promise<void> {
     .forEach((id) => void preloadImage(sceneUrl(id)));
   Object.values(ITEMS).forEach((item) => void preloadImage(itemUrl(item.id)));
   void preloadImage(NEEDLE_URL);
+  Object.values(SCENE_PROPS).forEach((list) => list?.forEach((p) => void preloadImage(p.img)));
   (Object.keys(OVERLAYS) as OverlayId[]).forEach((id) => void preloadImage(overlayUrl(id)));
 }
 
@@ -304,6 +396,14 @@ initDebug(stage, [
   },
   { label: '− Chìa', run: () => inventory.remove('study_room_lock') },
   { label: '+ Chìa kho', run: () => inventory.add('storage_key') },
+  {
+    label: '+ Gỗ x2, Diêm',
+    run: () => {
+      inventory.add('wood');
+      inventory.add('wood_2');
+      inventory.add('matches');
+    },
+  },
   { label: 'Chạy mở đầu', run: () => void dialogue.play(INTRO) },
   { label: 'Thử câu tự tắt', run: () => dialogue.show('door_locked') },
 ]);

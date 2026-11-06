@@ -53,6 +53,10 @@ export const LINES = {
   bedroom_pic_3: L('speech', 'Marie?', 'Marie?'),
   bedroom_pic_4: L('speech', 'Venica?', 'Venica?'),
 
+  // ----- Lò sưởi (bản nháp, bạn sửa lại cho đúng ý) -----
+  fireplace_look: L('thought', 'Lò sưởi đã nguội lạnh.', 'The fireplace has gone cold.'),
+  fireplace_need_wood: L('thought', 'Chưa có gì để đốt.', 'There is nothing to burn yet.'),
+
   // ----- Đồng hồ -----
   study_clock_time: L('thought', '4:35 p.m.', '4:35 p.m.'), // đồng hồ góc thư phòng
   clock_click: L('sfx', '*cạch*', '*click*', 'clack'), // chỉnh đúng giờ ở hành lang

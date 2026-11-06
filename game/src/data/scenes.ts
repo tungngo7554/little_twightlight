@@ -13,7 +13,13 @@ export type SceneId =
   | 'hall_clock_close' // cận cảnh mặt đồng hồ (chỉnh kim)
   | 'hall_clock_open_key' // đồng hồ đã mở, còn chìa khoá
   | 'hall_clock_open' // đồng hồ đã mở, hết chìa khoá
-  | 'master_bedroom'; // phòng ngủ của hai vợ chồng
+  | 'master_bedroom' // phòng ngủ của hai vợ chồng
+  | 'hall_2nd_venica_room' // phía cửa phòng Venica ở hành lang tầng 2
+  | 'hall_2nd_left' // hành lang tầng 2, nhìn sang bên trái
+  | 'main_hall_1st' // sảnh chính tầng 1
+  | 'main_hall_1st_2' // sảnh chính tầng 1, sau khi lò sưởi đã được đốt
+  | 'lo_suoi' // lò sưởi chưa đốt
+  | 'lo_suoi_sang'; // lò sưởi đã đốt
 
 export interface SceneDef {
   id: SceneId;
@@ -34,6 +40,12 @@ export const SCENES: Record<SceneId, SceneDef> = {
   hall_clock_open_key: { id: 'hall_clock_open_key', bg: 'bg_hall_clock_open_key.png', label: 'Đồng hồ mở (có chìa)' },
   hall_clock_open: { id: 'hall_clock_open', bg: 'bg_hall_clock_open.png', label: 'Đồng hồ mở (hết chìa)' },
   master_bedroom: { id: 'master_bedroom', bg: 'master_bedroom.png', label: 'Phòng ngủ chính' },
+  hall_2nd_venica_room: { id: 'hall_2nd_venica_room', bg: 'bg_hall_2nd_venica_room.png', label: 'Hành lang (phía phòng Venica)' },
+  hall_2nd_left: { id: 'hall_2nd_left', bg: 'bg_hall_2nd_left.png', label: 'Hành lang (bên trái)' },
+  main_hall_1st: { id: 'main_hall_1st', bg: 'bg_1st_main_hall.png', label: 'Sảnh chính tầng 1' },
+  main_hall_1st_2: { id: 'main_hall_1st_2', bg: 'bg_1st_main_hall_2.png', label: 'Sảnh chính tầng 1 (lò sưởi đã đốt)' },
+  lo_suoi: { id: 'lo_suoi', bg: 'lo_suoi.png', label: 'Lò sưởi' },
+  lo_suoi_sang: { id: 'lo_suoi_sang', bg: 'lo_suoi_sang.png', label: 'Lò sưởi (đã đốt)' },
 };
 
 export const START_SCENE: SceneId = 'study_locked';
@@ -68,6 +80,11 @@ export type HotspotId =
   | 'study_clock' // đồng hồ góc thư phòng (xem giờ)
   | 'hall_shelf' // kệ sách ở hành lang
   | 'master_door' // cửa phòng ngủ chính ở cuối hành lang
+  | 'venica_door' // vùng bên trái hành lang, dẫn sang hall_2nd_venica_room
+  | 'to_hall_left' // từ hall_2nd_venica_room sang hall_2nd_left
+  | 'to_main_hall' // từ hall_2nd_left xuống main_hall_1st
+  | 'to_fireplace' // từ sảnh tầng 1 sang cận cảnh lò sưởi
+  | 'fireplace' // vùng đặt gỗ / quẹt diêm trong cận cảnh lò sưởi
   | 'bedroom_picture' // bức tranh trong phòng ngủ chính (mở lớp phủ)
   | 'shelf_zoom' // nhìn kỹ hơn kệ sách
   | 'shelf_clock' // đồng hồ trên kệ
@@ -113,6 +130,12 @@ const DESK_ITEMS: HotspotDef[] = [
   { id: 'book', label: 'Sách', rect: { x: 38, y: 28, w: 25.7, h: 26.1 } },
 ];
 
+// Vùng bấm của sảnh tầng 1, dùng chung cho bản trước và sau khi đốt lò sưởi
+const MAIN_HALL_HOTSPOTS: HotspotDef[] = [
+  { id: 'back', label: 'Quay lại', rect: { x: 76.4, y: 59.9, w: 23.6, h: 40.1 } },
+  { id: 'to_fireplace', label: 'Lò sưởi', rect: { x: 58.8, y: 30.4, w: 15.3, h: 30.8 } },
+];
+
 export const HOTSPOTS: Record<SceneId, HotspotDef[]> = {
   study_locked: [DESK, DOOR, STUDY_CLOCK],
   study_open: [DESK, DOOR, STUDY_CLOCK],
@@ -126,6 +149,7 @@ export const HOTSPOTS: Record<SceneId, HotspotDef[]> = {
     { id: 'hall_door', label: 'Cửa thư phòng', rect: { x: 65, y: 16.4, w: 22.6, h: 80.4 } },
     { id: 'hall_shelf', label: 'Kệ sách', rect: { x: 43.7, y: 19.6, w: 14.5, h: 52.7 } },
     { id: 'master_door', label: 'Cửa phòng ngủ chính', rect: { x: 30.3, y: 29.3, w: 12.7, h: 28 } },
+    { id: 'venica_door', label: 'Sang bên trái', rect: { x: 0.7, y: 26.5, w: 23.2, h: 73.5 } },
   ],
   hall_shelf: [
     ...SIDE_BACK,
@@ -152,4 +176,24 @@ export const HOTSPOTS: Record<SceneId, HotspotDef[]> = {
     // Đặt sau dải quay lại để nằm trên nó ở chỗ hai vùng chồng nhau
     { id: 'bedroom_picture', label: 'Bức tranh', rect: { x: 6.6, y: 56.3, w: 17.6, h: 9.7 } },
   ],
+  hall_2nd_venica_room: [
+    // TODO: dải quay lại tạm, vẽ lại khi có toạ độ
+    ...SIDE_BACK,
+    { id: 'to_hall_left', label: 'Đi tiếp', rect: { x: 25.9, y: 26.6, w: 25.9, h: 44.7 } },
+  ],
+  hall_2nd_left: [
+    // TODO: dải quay lại tạm, vẽ lại khi có toạ độ
+    ...SIDE_BACK,
+    { id: 'to_main_hall', label: 'Xuống sảnh chính', rect: { x: 50.8, y: 46.6, w: 14.3, h: 28.6 } },
+  ],
+  main_hall_1st: MAIN_HALL_HOTSPOTS,
+  main_hall_1st_2: MAIN_HALL_HOTSPOTS,
+  lo_suoi: [
+    // TODO: dải quay lại tạm, vẽ lại khi có toạ độ
+    ...SIDE_BACK,
+    // Lòng lò sưởi: nơi đặt gỗ và quẹt diêm
+    { id: 'fireplace', label: 'Lòng lò sưởi', rect: { x: 30.7, y: 34.8, w: 38.7, h: 45.3 } },
+  ],
+  // TODO: dải quay lại tạm, vẽ lại khi có toạ độ
+  lo_suoi_sang: [...SIDE_BACK],
 };

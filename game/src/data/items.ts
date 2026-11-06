@@ -3,7 +3,7 @@ import type { Lang } from './i18n';
 // Vật phẩm. Mặc định vật phẩm là "tiêu hao" (dùng xong thì biến mất khỏi túi đồ).
 // Riêng chìa khoá thư phòng đặt consumable: false vì nó đi theo người chơi đến hết game.
 
-export type ItemId = 'study_room_lock' | 'storage_key';
+export type ItemId = 'study_room_lock' | 'storage_key' | 'wood' | 'wood_2' | 'matches';
 
 export interface ItemDef {
   id: ItemId;
@@ -24,6 +24,25 @@ export const ITEMS: Record<ItemId, ItemDef> = {
     img: 'storage_key.png',
     consumable: true,
     name: { vi: 'Chìa khóa kho', en: 'Storage key' },
+  },
+  // Hai khúc gỗ dùng chung một ảnh. Tách làm hai vật phẩm vì túi đồ chưa đếm số lượng.
+  wood: {
+    id: 'wood',
+    img: 'wood.png',
+    consumable: true,
+    name: { vi: 'Khúc gỗ', en: 'Log' },
+  },
+  wood_2: {
+    id: 'wood_2',
+    img: 'wood.png',
+    consumable: true,
+    name: { vi: 'Khúc gỗ', en: 'Log' },
+  },
+  matches: {
+    id: 'matches',
+    img: 'matches.png',
+    consumable: true,
+    name: { vi: 'Diêm', en: 'Matches' },
   },
 };
 
